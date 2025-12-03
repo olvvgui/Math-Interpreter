@@ -2,25 +2,83 @@
 #include <iostream>
 using namespace std;
 
-void Expression::inicialize(stack *p)
+void Expression::inicialize_stack(stack *s)
 {
-    p->top = p->bottom = nullptr;
-    p->size = 0;
+    s->top = s->bottom = nullptr;
+    s->size = 0;
 }
 
-void Expression::push(char c, stack *p)
+void Expression::push(char c, stack *s)
 {
     node *token = new node;
 
     token->val = c;
-    token->next = p->top;
+    token->next = s->top;
 
-    p->top = token;
+    s->top = token;
 
-    if (p->bottom == nullptr)
-        p->bottom = token;
+    if (s->bottom == nullptr)
+        s->bottom = token;
 
-    p->size++;
+    s->size++;
+    return;
+}
+void Expression::pop(stack *s)
+{
+    if (s->top == nullptr)
+        return;
+
+    node *aux = s->top;
+
+    s->top = s->top->next;
+    delete aux;
+
+    if (s->top == nullptr)
+        s->bottom = nullptr;
+
+    s->size--;
+    return;
+}
+
+void Expression::inicialize_queue(queue *q)
+{
+    q->first = q->last = nullptr;
+    q->size = 0;
+}
+void Expression::enqueue(char exp, queue *q)
+{
+    node *token = new node;
+    token->val = exp;
+    token->next = nullptr;
+
+    if (q->first == nullptr)
+    {
+        q->first = token;
+        q->last = token;
+    }
+    else
+    {
+        q->last->next = token;
+        q->last = token;
+    }
+    q->size++;
+    return;
+}
+
+void Expression::dequeue(queue *q)
+{
+
+    if (q->first == nullptr)
+        return;
+    node *aux = q->first;
+
+    q->first = q->first->next; // case q.1.nxt = null the expression is null
+    delete aux;
+
+    if (q->first == nullptr)
+        q->last = nullptr;
+
+    q->size--;
     return;
 }
 
@@ -124,7 +182,12 @@ char Expression::isOperator(char op)
             return c;
     }
 }
+
+void Expression::infix_to_posfix(stack *s, queue *q)
+{
+    
+}
+
 void Expression::compile(stack *raw)
 {
-
 }
