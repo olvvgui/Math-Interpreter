@@ -2,55 +2,49 @@
 #include <iostream>
 using namespace std;
 
-void Expression::inicialize(list *l)
+void Expression::inicialize(stack *p)
 {
-    l->first = l->last = nullptr;
-    l->size = 0;
+    p->top = p->bottom = nullptr;
+    p->size = 0;
 }
 
-void Expression::insert(char c, list *l)
+void Expression::push(char c, stack *p)
 {
     node *token = new node;
 
     token->val = c;
+    token->next = p->top;
 
-    if (l->first == nullptr)
-    {
-        token->next = nullptr;
-        l->first = l->last = token;
-        l->size++;
-    }
+    p->top = token;
 
-    else
-    {
-        token->next = nullptr;
-        l->last->next = token;
-        l->last = token;
-        l->size++;
-    }
+    if (p->bottom == nullptr)
+        p->bottom = token;
+
+    p->size++;
     return;
 }
 
-bool Expression::verify_expression(list *raw, list *no_space_list)
+bool Expression::verify_expression(stack *raw, stack *no_space_list)
 {
-    node *cur = raw->first;              // cursor
-    node *ns_cur = no_space_list->first; // no space cursor
+    node *cur = raw->top;              // cursor
+    node *ns_cur = no_space_list->top; // no space cursor
 
     int stack = 0;
 
     char oprs[] = {'*', '/', '^'};
     char oprs1[] = {'+', '-'};
     char operators[] = {'+', '-', '*', '/', '^'};
-
-    for (char c : operators) // prohibited: *3-2 || 3-2/
+    if (raw->bottom && raw->top != nullptr)
     {
-        if (raw->first->val == c)
-            return false;
+        for (char c : operators) // prohibited: *3-2 || 3-2/
+        {
+            if (raw->bottom->val == c)
+                return false;
 
-        if (raw->last->val == c)
-            return false;
+            if (raw->top->val == c)
+                return false;
+        }
     }
-
     while (cur != nullptr && cur->next != nullptr) // prohibitions
     {
 
@@ -62,6 +56,11 @@ bool Expression::verify_expression(list *raw, list *no_space_list)
     }
     while (ns_cur != nullptr && ns_cur->next != nullptr)
     {
+
+        for (char c : operators)
+            if (!isdigit(ns_cur->val) || ns_cur->val != c)
+                return false;
+
         for (char c : oprs)
         {
             if (ns_cur->val == c && ns_cur->next->val == c) // prohibited: 3**2 || 3*/2
@@ -105,7 +104,7 @@ bool Expression::verify_expression(list *raw, list *no_space_list)
 
     return true;
 
-    // prohibitions list
+    // prohibitions stack
     // prohibited: *3-2 || 3-2/
     // prohibited: 3**2 || 3*/2
     // prohibited: (*3
@@ -115,18 +114,17 @@ bool Expression::verify_expression(list *raw, list *no_space_list)
     // prohibited: 4(3)
 }
 
-bool Expression::isOperator(char op)
+char Expression::isOperator(char op)
 {
     char operators[] = {'+', '-', '*', '/', '^'};
 
     for (char c : operators)
     {
         if (op == c)
-            return true;
+            return c;
     }
-
-    return false;
 }
-void Expression::compile()
+void Expression::compile(stack *raw)
 {
+
 }

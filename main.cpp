@@ -5,22 +5,27 @@ using namespace std;
 int main()
 {
     Expression exp;
-    Expression::list raw_list;
-    Expression::list ns_list; // no space list
-    exp.inicialize(&raw_list);
+    Expression::stack raw_stack;
+    Expression::stack ns_stack; // no space stack
+    exp.inicialize(&raw_stack);
+    exp.inicialize(&ns_stack);
 
+    // system("clear");
+
+    cout << "Example of a valid expression\n(-4) + 3 * 5^4 (3/4)\n\n";
     cout << "Type your Expression:\n";
-    char c;
-    while (c = cin.get())
+
+    while (true)
     {
+        char c = cin.get();
 
         if (c == '\n')
             break;
 
-        exp.insert(c, &raw_list);
+        exp.push(c, &raw_stack);
 
         if (c != ' ')
-            exp.insert(c, &ns_list);
+            exp.push(c, &ns_stack);
     }
-    exp.verify_expression(&raw_list, &ns_list);
+    printf("%s\n", exp.verify_expression(&raw_stack, &ns_stack) ? "deu certo" : "false");
 }

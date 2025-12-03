@@ -1,5 +1,5 @@
-#ifndef LIST_H
-#define LIST_H
+#ifndef EXPRESSION_H
+#define EXPRESSION_H
 
 #include <iostream>
 using namespace std;
@@ -11,23 +11,22 @@ public:
     typedef struct node
     {
         char val;
-
         struct node *next;
     } node;
 
     typedef struct
     {
-        node *first;
-        node *last;
+        node *top;
+        node *bottom;
         int size;
-    } list;
+    } stack;
 
-    void inicialize(list *l);
-    void insert(char exp, list *l);
-    void compile();
-    bool verify_expression(list *l, list *no_space_list);
+    void inicialize(stack *p);
+    void push(char exp, stack *p);
+    void compile(stack *raw);
+    bool verify_expression(stack *p, stack *no_space_stack);
 
-    bool isOperator(char op);
+    char isOperator(char op);
 };
 
 #endif
