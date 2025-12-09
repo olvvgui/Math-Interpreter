@@ -6,7 +6,7 @@ using namespace std;
 
 void Expression::inicialize_stack(stack *s)
 {
-    s->top = s->bottom = nullptr;
+    s->top = nullptr;
     s->size = 0;
 }
 
@@ -16,12 +16,7 @@ void Expression::push(char c, stack *s)
 
     token->val = c;
     token->next = s->top;
-
     s->top = token;
-
-    if (s->bottom == nullptr)
-        s->bottom = token;
-
     s->size++;
     return;
 }
@@ -35,10 +30,6 @@ char Expression::pop(stack *s)
 
     s->top = s->top->next;
     delete aux;
-
-    if (s->top == nullptr)
-        s->bottom = nullptr;
-
     s->size--;
     return v;
 }
@@ -50,7 +41,7 @@ void Expression::inicialize_queue(queue *q)
 }
 void Expression::enqueue(char exp, queue *q)
 {
-    node_queue *token = new node_queue;
+    node *token = new node;
     token->val = exp;
     token->next = nullptr;
 
@@ -73,7 +64,7 @@ void Expression::dequeue(queue *q)
 
     if (q->first == nullptr)
         return;
-    node_queue *aux = q->first;
+    node *aux = q->first;
 
     q->first = q->first->next; // case q.1.nxt = null the expression is null
     delete aux;
@@ -85,10 +76,10 @@ void Expression::dequeue(queue *q)
     return;
 }
 
-bool Expression::verify_expression(stack *raw, stack *no_space_list)
+bool Expression::verify_expression(queue *raw, queue *no_space_queue)
 {
-    node_stack *cur = raw->top;              // cursor
-    node_stack *ns_cur = no_space_list->top; // no space cursor
+    node *cur = raw->first;               // curor
+    node *ns_cur = no_space_queue->first; // no space curor
 
     int parentheses = 0;
 
@@ -97,14 +88,14 @@ bool Expression::verify_expression(stack *raw, stack *no_space_list)
     char operators[] = {'+', '-', '*', '/', '^'};
 
     // ------ first and last number ------
-    if (raw->top != nullptr)
+    if (raw->first != nullptr)
     {
         for (char c : oprs) // prohibited: *3-2 || 3-2/
 
-            if (raw->bottom->val == c)
+            if (raw->last->val == c)
                 return false;
 
-        if (isOperator(raw->top->val))
+        if (isOperator(raw->first->val))
             return false;
     }
     // ------ numbers in sequence ------
@@ -234,93 +225,87 @@ int Expression::get_precedence(char op)
     return 0;
 }
 
-void Expression::infix_to_posfix(stack *s, queue *q)
+void Expression::infix_to_posfix(queue *ifx, queue *pfx)
 {
-    node_stack *curS = s->top;
+    node *cur = ifx->first;
     stack *oprS = new stack;
     inicialize_stack(oprS);
-    while (curS != nullptr)
+    while (cur != nullptr)
     {
-        if (isdigit(curS->val))
+        if (isdigit(cur->val))
         {
-            while (curS != nullptr && isdigit(curS->val))
+            while (cur != nullptr && isdigit(cur->val))
             {
-                enqueue(curS->val, q);
-                curS = curS->next;
+                enqueue(cur->val, pfx);
+                cur = cur->next;
             }
-            enqueue(' ', q);
+            enqueue(' ', pfx);
             continue;
         }
 
-        if (curS->val == '(')
-            push(curS->val, oprS);
+        if (cur->val == '(')
+            push(cur->val, oprS);
 
-        else if (curS->val == ')')
+        else if (cur->val == ')')
         {
             while (oprS->top != nullptr && oprS->top->val != '(')
-                enqueue(pop(oprS), q);
+                enqueue(pop(oprS), pfx);
 
             pop(oprS);
         }
 
         else
         {
-            string assoc = (curS->val == '^') ? "right" : "left"; // association
+            string assoc = (cur->val == '^') ? "right" : "left"; // association
 
             while (oprS->top != nullptr && oprS->top->val != '(')
             {
-                int topPrec = get_precedence(oprS->top->val);
-                int tokPrec = get_precedence(curS->val);
+                int firstPrec = get_precedence(oprS->top->val);
+                int tokPrec = get_precedence(cur->val);
 
-                if ((assoc == "left" && topPrec >= tokPrec) ||
-                    (assoc == "right" && topPrec > tokPrec))
-                    enqueue(pop(oprS), q);
+                if ((assoc == "left" && firstPrec >= tokPrec) ||
+                    (assoc == "right" && firstPrec > tokPrec))
+                    enqueue(pop(oprS), pfx);
 
                 else
                     break;
             }
 
-            push(curS->val, oprS);
+            push(cur->val, oprS);
         }
 
-        curS = curS->next;
+        cur = cur->next;
     }
     while (oprS->top != nullptr)
-        enqueue(pop(oprS), q);
+        enqueue(pop(oprS), pfx);
 
     delete oprS;
 }
 
-void Expression::print(stack *s, queue *q)
+void Expression::print(queue *ifx, queue *pfx)
 {
-    node_stack *curS = s->top;
-    node_queue *curQ = q->first;
+    node *curIFX = ifx->first;
+    node *curPFX = pfx->first;
 
-    vector<char> temp;
-
-    while (curS != nullptr)
+    while (curIFX != nullptr)
     {
-        temp.push_back(curS->val);
-        curS = curS->next;
-    }
+        cout << curIFX->val;
 
-    // imprimir invertido
-    for (int i = temp.size() - 1; i >= 0; i--)
-        cout << temp[i];
+        curIFX = curIFX->next;
+    }
 
     cout << "\n";
 
-
-    while (curQ != nullptr)
+    while (curPFX != nullptr)
     {
-        cout << curQ->val;
+        cout << curPFX->val;
 
-        curQ = curQ->next;
+        curPFX = curPFX->next;
     }
 
     cout << "\n";
 }
 
-void Expression::compile(stack *raw)
+void Expression::compile(queue *pfx)
 {
 }

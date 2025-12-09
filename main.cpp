@@ -5,13 +5,12 @@ using namespace std;
 int main()
 {
     Expression exp;
-    Expression::stack raw_stack;
-    Expression::stack ns_stack; // no space stack
-    exp.inicialize_stack(&raw_stack);
-    exp.inicialize_stack(&ns_stack);
-
-    Expression::queue q;
-    exp.inicialize_queue(&q);
+    Expression::queue raw_queue;
+    Expression::queue ns_queue; // no space queue
+    Expression::queue posfix;
+    exp.inicialize_queue(&raw_queue);
+    exp.inicialize_queue(&ns_queue);
+    exp.inicialize_queue(&posfix);
 
     // system("clear");
 
@@ -25,14 +24,14 @@ int main()
         if (c == '\n')
             break;
 
-        exp.push(c, &raw_stack);
+        exp.enqueue(c, &raw_queue);
 
         if (c != ' ')
-            exp.push(c, &ns_stack);
+            exp.enqueue(c, &ns_queue);
     }
-    printf("%s\n", exp.verify_expression(&raw_stack, &ns_stack) ? "deu certo" : "false");
+    printf("%s\n", exp.verify_expression(&raw_queue, &ns_queue) ? "deu certo" : "false");
 
-    exp.infix_to_posfix(&raw_stack, &q);
+    exp.infix_to_posfix(&raw_queue, &posfix);
 
-    exp.print(&raw_stack, &q);
+    exp.print(&raw_queue, &posfix);
 }
