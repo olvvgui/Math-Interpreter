@@ -2,43 +2,54 @@
 #define EXPRESSION_H
 
 #include <iostream>
+#include <vector>
 using namespace std;
 
 class Expression
 {
 
 public:
-    typedef struct node
+    typedef struct node_stack
     {
         char val;
-        struct node *next;
-    } node;
+        struct node_stack *next;
+    } node_stack;
 
     typedef struct
     {
-        node *top;
-        node *bottom;
+        node_stack *top;
+        node_stack *bottom;
         int size;
     } stack;
 
+    typedef struct node_queue
+    {
+        string val;
+        struct node_queue *next;
+    } node_queue;
+
     typedef struct
     {
-        node *first;
-        node *last;
+        node_queue *first;
+        node_queue *last;
         int size;
     } queue;
 
     void inicialize_stack(stack *s);
     void push(char exp, stack *s);
-    void pop(stack *s);
+    char pop(stack *s);
 
     void inicialize_queue(queue *q);
     void enqueue(char exp, queue *q);
     void dequeue(queue *q);
 
+    bool isOperator(char op);
+    char returnOperator(char op);
+    int get_precedence(char op);
+    void print(stack *s, queue *q);
+
     bool verify_expression(stack *s, stack *no_space_stack);
     void infix_to_posfix(stack *s, queue *q);
-    char isOperator(char op);
     void compile(stack *raw);
 };
 
