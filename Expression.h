@@ -2,7 +2,7 @@
 #define EXPRESSION_H
 
 #include <iostream>
-#include <vector>
+#include <cmath>
 using namespace std;
 
 class Expression
@@ -35,6 +35,20 @@ public:
         int size;
     } stack;
 
+    typedef struct leaf
+    {
+        int val;
+        struct leaf *left;
+        struct leaf *right;
+
+    } leaf;
+
+    typedef struct
+    {
+        leaf *data[100];
+        int top;
+    } tree;
+
     void inicialize_queue(queue *q);
     void enqueue(char exp, queue *q);
     void dequeue(queue *q);
@@ -43,14 +57,22 @@ public:
     void push(char exp, stack *s);
     char pop(stack *s);
 
+    void inicialize_tree(tree *t);
+    void push_tree(tree *t, leaf *n);
+    leaf *pop_tree(tree *t);
+    leaf *new_leaf(char val);
+
     bool isOperator(char op);
     char returnOperator(char op);
     int get_precedence(char op);
     void print(queue *ifx, queue *pfx);
 
+    int parse_char(queue *pfx);
+
     bool verify_expression(queue *s, queue *no_space_queue);
     void infix_to_posfix(queue *ifx, queue *pfx);
-    void compile(queue *pfx);
+    leaf *posfix_to_tree(queue *pfx);
+    double compile(leaf *l);
 };
 
 #endif

@@ -1,38 +1,8 @@
 #include "Expression.h"
 #include <iostream>
-#include <vector>
+#include <cmath>
 
 using namespace std;
-
-void Expression::inicialize_stack(stack *s)
-{
-    s->top = nullptr;
-    s->size = 0;
-}
-
-void Expression::push(char c, stack *s)
-{
-    node_stack *token = new node_stack;
-
-    token->val = c;
-    token->next = s->top;
-    s->top = token;
-    s->size++;
-    return;
-}
-char Expression::pop(stack *s)
-{
-    if (s->top == nullptr)
-        return ' ';
-
-    int v = s->top->val;
-    node_stack *aux = s->top;
-
-    s->top = s->top->next;
-    delete aux;
-    s->size--;
-    return v;
-}
 
 void Expression::inicialize_queue(queue *q)
 {
@@ -75,6 +45,61 @@ void Expression::dequeue(queue *q)
 
     q->size--;
     return;
+}
+
+void Expression::inicialize_stack(stack *s)
+{
+    s->top = nullptr;
+    s->size = 0;
+}
+
+void Expression::push(char c, stack *s)
+{
+    node_stack *token = new node_stack;
+
+    token->val = c;
+    token->next = s->top;
+    s->top = token;
+    s->size++;
+    return;
+}
+char Expression::pop(stack *s)
+{
+    if (s->top == nullptr)
+        return ' ';
+
+    int v = s->top->val;
+    node_stack *aux = s->top;
+
+    s->top = s->top->next;
+    delete aux;
+    s->size--;
+    return v;
+}
+
+void Expression::inicialize_tree(tree *t)
+{
+    t->top = -1;
+}
+
+void Expression::push_tree(tree *t, leaf *n)
+{
+    t->top++;
+    t->data[t->top] = n;
+    return;
+}
+Expression::leaf *Expression::pop_tree(Expression::tree *t)
+{
+    if (t->top < 0)
+        return nullptr;
+    return t->data[t->top--];
+}
+Expression::leaf *Expression::new_leaf(char val)
+{
+    leaf *l = new leaf;
+    l->val = val;
+    l->left = l->right = nullptr;
+    return l;
 }
 
 bool Expression::verify_expression(queue *raw, queue *no_space_queue)
@@ -314,7 +339,7 @@ void Expression::print(queue *ifx, queue *pfx)
         curIFX = curIFX->next;
     }
 
-    cout << "\n\n" ;
+    cout << "\n\n";
 
     while (curPFX != nullptr)
     {
@@ -328,7 +353,104 @@ void Expression::print(queue *ifx, queue *pfx)
 
     cout << "\n\n";
 }
-
-void Expression::compile(queue *pfx)
+int Expression::parse_char(queue *pfx)
 {
+    node *cur = pfx->first;
+    int val = 0;
+
+    while (cur != nullptr && isdigit(cur->val))
+    {
+        val = val * 10 + (cur->val - '0'); // subtract  the ASCII values
+        cur = cur->next;
+    }
+    return val;
+    /*
+    val = val * 10 - (ASCII value of char - ASCII value of 0)
+    '129'
+    val = 0;
+
+    val = 0 * 10 + (49 - 48)
+    val = 1
+
+    val = 1 * 10 + (50 - 48)
+    val = 10 + 2
+    val = 12
+
+    val = 12 * 10 + (57 - 48)
+    val = 120 + 9
+    val = 129
+
+    */
+}
+
+Expression::leaf *Expression::posfix_to_tree(queue *pfx)
+{
+    tree t;
+    inicialize_tree(&t);
+    node *cur = pfx->first;
+
+    while (cur != nullptr)
+    {
+        // cout << "Lendo: [" << cur->val << "]" << endl;
+
+        if (cur->val == ' ')
+        {
+            cur = cur->next;
+            continue;
+        }
+
+        if (isdigit(cur->val))
+            push_tree(&t, new_leaf(cur->val));
+
+        else if (cur->val == '~')
+        {
+            leaf *right = pop_tree(&t);
+            leaf *root = new_leaf(cur->val);
+            root->right = right;
+            root->left = nullptr;
+            push_tree(&t, root);
+        }
+
+        else
+        {
+            leaf *right = pop_tree(&t);
+            leaf *left = pop_tree(&t);
+            leaf *root = new_leaf(cur->val);
+            root->right = right;
+            root->left = left;
+            push_tree(&t, root);
+        }
+
+        cur = cur->next;
+    }
+    return pop_tree(&t);
+}
+double Expression::compile(leaf *root)
+{
+    if (isdigit(root->val))
+        return double(root->val - '0');
+
+    if (root->val == '~')
+    {
+        double right = compile(root->right);
+        return -right;
+    }
+
+    double left = compile(root->left);
+    double right = compile(root->right);
+
+    switch (root->val)
+    {
+    case '+':
+        return left + right;
+    case '-':
+        return left - right;
+    case '*':
+        return left * right;
+    case '/':
+        return left / right;
+    case '^':
+        return pow(left, right);
+    }
+    return 0;
 }
