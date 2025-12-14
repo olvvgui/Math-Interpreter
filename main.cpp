@@ -18,14 +18,12 @@ int main()
 
     while (true)
     {
-        system("clear");
+        // system("clear");
 
         exp.inicialize_queue(&raw_queue);
         exp.inicialize_queue(&ns_queue);
         exp.inicialize_queue(&posfix);
         exp.inicialize_tree(&tree);
-
-        system("clear");
 
         cout << BOLD << "Example of a valid expression:"
              << RESET << endl;
@@ -56,7 +54,7 @@ int main()
 
         exp.infix_to_posfix(&ns_queue, &posfix);
 
-        // exp.print(&ns_queue, &posfix);
+        exp.print(&ns_queue, &posfix);
 
         Expression::leaf *leaf = exp.posfix_to_tree(&posfix);
         cout << BOLD << "\nResult: " << RESET;

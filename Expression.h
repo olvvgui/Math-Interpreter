@@ -37,7 +37,9 @@ public:
 
     typedef struct leaf
     {
-        int val;
+        char val;
+        double val_number;
+        bool isNumber;
         struct leaf *left;
         struct leaf *right;
 
@@ -61,13 +63,14 @@ public:
     void push_tree(tree *t, leaf *n);
     leaf *pop_tree(tree *t);
     leaf *new_leaf(char val);
+    leaf *new_leaf_number(double val);
 
     bool isOperator(char op);
     char returnOperator(char op);
     int get_precedence(char op);
     void print(queue *ifx, queue *pfx);
 
-    int parse_char(queue *pfx);
+    double parse_char(node* &digit);
 
     bool verify_expression(queue *s, queue *no_space_queue);
     void infix_to_posfix(queue *ifx, queue *pfx);

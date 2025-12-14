@@ -84,6 +84,11 @@ void Expression::inicialize_tree(tree *t)
 
 void Expression::push_tree(tree *t, leaf *n)
 {
+    if (t->top >= 100 - 1)
+    {
+        return;
+    }
+
     t->top++;
     t->data[t->top] = n;
     return;
@@ -99,6 +104,16 @@ Expression::leaf *Expression::new_leaf(char val)
     leaf *l = new leaf;
     l->val = val;
     l->left = l->right = nullptr;
+    l->isNumber = false;
+    return l;
+}
+
+Expression::leaf *Expression::new_leaf_number(double val)
+{
+    leaf *l = new leaf;
+    l->val_number = val;
+    l->left = l->right = nullptr;
+    l->isNumber = true;
     return l;
 }
 
@@ -112,24 +127,30 @@ bool Expression::verify_expression(queue *raw, queue *no_space_queue)
     char oprs[] = {'*', '/', '^'};
     char oprs1[] = {'+', '-'};
     char operators[] = {'+', '-', '*', '/', '^'};
+    int numberCount = 0;
 
     // ------ first and last number ------
     if (raw->first != nullptr)
-    {
+
         for (char c : oprs) // prohibited: *3-2 || 3-2/
 
-            if (raw->last->val == c)
+            if (raw->last->val == c || raw->first->val == c)
                 return false;
 
-        if (isOperator(raw->first->val))
-            return false;
-    }
     // ------ numbers in sequence ------
     while (cur != nullptr && cur->next != nullptr) // prohibitions
     {
+        char val = cur->val;
+        char nextVal = cur->next->val;
 
-        if (cur->next->next != nullptr &&
-            (isdigit(cur->val) && cur->next->val == ' ' && isdigit(cur->next->next->val))) // prohibited: 2 2
+        if (isdigit(val) && nextVal == ' ')
+        {
+            numberCount++;
+        }
+        if (isOperator(val))
+            numberCount = 0;
+
+        if (numberCount > 1)
             return false;
 
         cur = cur->next;
@@ -353,16 +374,30 @@ void Expression::print(queue *ifx, queue *pfx)
 
     cout << "\n\n";
 }
-int Expression::parse_char(queue *pfx)
+double Expression::parse_char(node *&cur)
 {
-    node *cur = pfx->first;
-    int val = 0;
+
+    double val = 0;
+    double factor = 0.1;
 
     while (cur != nullptr && isdigit(cur->val))
     {
         val = val * 10 + (cur->val - '0'); // subtract  the ASCII values
         cur = cur->next;
     }
+
+    if (cur != nullptr && (cur->val == '.' || cur->val == ','))
+    {
+        cur = cur->next;
+
+        while (isdigit(cur->val))
+        {
+            val += (cur != nullptr && cur->val - '0') * factor;
+            factor *= 0.1;
+            cur = cur->next;
+        }
+    }
+
     return val;
     /*
     val = val * 10 - (ASCII value of char - ASCII value of 0)
@@ -400,7 +435,10 @@ Expression::leaf *Expression::posfix_to_tree(queue *pfx)
         }
 
         if (isdigit(cur->val))
-            push_tree(&t, new_leaf(cur->val));
+        {
+            push_tree(&t, new_leaf_number(parse_char(cur)));
+            continue;
+        }
 
         else if (cur->val == '~')
         {
@@ -427,8 +465,8 @@ Expression::leaf *Expression::posfix_to_tree(queue *pfx)
 }
 double Expression::compile(leaf *root)
 {
-    if (isdigit(root->val))
-        return double(root->val - '0');
+    if (root->isNumber)
+        return root->val_number;
 
     if (root->val == '~')
     {
