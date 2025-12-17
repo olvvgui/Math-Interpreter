@@ -1,32 +1,39 @@
-# Nome do executável
-TARGET = programa
+# ==============================
+# CONFIGURAÇÕES FÁCEIS DE ALTERAR
+# ==============================
 
-# Compilador
-CXX = g++
-CXXFLAGS = -Wall -std=c++17
+TARGET   = Math_Interpreter
+CXX      = g++
+CXXFLAGS = -Wall -Wextra -std=c++17
+INCLUDES = -Iincludes
 
-# Arquivos
-SRCS = main.cpp expression.cpp
-OBJS = $(SRCS:.cpp=.o)
+# ==============================
+# ARQUIVOS DO PROJETO
+# ==============================
+
+SRC = Main.cpp \
+      includes/Expression.cpp \
+      includes/Token.cpp \
+      includes/Utils.cpp
+
+OBJ = $(SRC:.cpp=.o)
+
+# ==============================
+# REGRAS
+# ==============================
 
 all: $(TARGET)
 
-# Regra para o executável
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+$(TARGET): $(OBJ)
+	$(CXX) $(CXXFLAGS) $(OBJ) -o $(TARGET)
 
-# Regra genérica para gerar .o
-%.o: %.cpp expression.h
-	$(CXX) $(CXXFLAGS) -c $<
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-# Executar normalmente
-run: $(TARGET)
+clean:
+	rm -f $(OBJ) $(TARGET)
+
+run: all
 	./$(TARGET)
 
-# Executar com input vindo de arquivo
-run-input: $(TARGET)
-	./$(TARGET) < input.txt
-
-# Limpar arquivos gerados
-clean:
-	rm -f $(OBJS) $(TARGET)
+.PHONY: all clean run

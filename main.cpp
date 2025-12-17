@@ -1,15 +1,14 @@
 #include <iostream>
-#include <limits>
 #include "Expression.h"
+#include "Token.h"
+#include "Utils.h"
 using namespace std;
 
 int main()
 {
     Expression exp;
-    Expression::queue raw_queue;
-    Expression::queue ns_queue; // no space queue
-    Expression::queue posfix;
-    Expression::tree tree;
+
+    string expression;
 
     const string RED = "\033[31m";
     const string GREEN = "\033[32m";
@@ -20,11 +19,6 @@ int main()
     {
         // system("clear");
 
-        exp.inicialize_queue(&raw_queue);
-        exp.inicialize_queue(&ns_queue);
-        exp.inicialize_queue(&posfix);
-        exp.inicialize_tree(&tree);
-
         cout << BOLD << "Example of a valid expression:"
              << RESET << endl;
 
@@ -34,34 +28,26 @@ int main()
         cout << RED << "Type your Expression:\n"
              << RESET << endl;
 
-        while (true)
+        getline(cin, expression);
+        if (expression.empty())
         {
-            char c = cin.get();
-
-            if (c == '\n')
-                break;
-
-            exp.enqueue(c, &raw_queue);
-
-            if (c != ' ')
-                exp.enqueue(c, &ns_queue);
-        }
-        if (!exp.verify_expression(&raw_queue, &ns_queue))
-        {
-            cout << "false";
-            return 1;
+            cout << "Empty Expression" << endl;
+            enter_to_continue();
+            continue;
         }
 
-        exp.infix_to_posfix(&ns_queue, &posfix);
+        vector<Token> tokens = tokenize(expression);
+        print_tokens(tokens);
 
-        exp.print(&ns_queue, &posfix);
+        if (!verify_expression(tokens))
+        {
+            cout << RED << "Unvalid Expression" << RESET << endl;
+            enter_to_continue();
+            continue;
+        }
 
-        Expression::leaf *leaf = exp.posfix_to_tree(&posfix);
-        cout << BOLD << "\nResult: " << RESET;
-        cout << GREEN << exp.compile(leaf) << RESET << endl;
+        exp.compile(tokens);
 
-        cout << RED << "\nPress enter to continue" << RESET << endl;
-
-        cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+        enter_to_continue();
     }
 }

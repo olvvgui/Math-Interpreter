@@ -3,15 +3,18 @@
 
 #include <iostream>
 #include <cmath>
-using namespace std;
 
+#include "Token.h"
+#include "Utils.h"
+
+using namespace std;
 class Expression
 {
 
-public:
+private:
     typedef struct node
     {
-        char val;
+        Token tok;
         struct node *prev;
         struct node *next;
     } node;
@@ -20,7 +23,6 @@ public:
     {
         node *first;
         node *last;
-        int size;
     } queue;
 
     typedef struct node_stack
@@ -37,9 +39,7 @@ public:
 
     typedef struct leaf
     {
-        char val;
-        double val_number;
-        bool isNumber;
+        Token tok;
         struct leaf *left;
         struct leaf *right;
 
@@ -52,30 +52,25 @@ public:
     } tree;
 
     void inicialize_queue(queue *q);
-    void enqueue(char exp, queue *q);
-    void dequeue(queue *q);
+    void enqueue(queue *q, Token t);
+    bool dequeue(queue *q, Token &out);
 
     void inicialize_stack(stack *s);
-    void push(char exp, stack *s);
+    void push(char c, stack *s);
     char pop(stack *s);
 
     void inicialize_tree(tree *t);
     void push_tree(tree *t, leaf *n);
     leaf *pop_tree(tree *t);
-    leaf *new_leaf(char val);
-    leaf *new_leaf_number(double val);
+    leaf *new_leaf(Token &t);
 
-    bool isOperator(char op);
-    char returnOperator(char op);
-    int get_precedence(char op);
-    void print(queue *ifx, queue *pfx);
-
-    double parse_char(node* &digit);
-
-    bool verify_expression(queue *s, queue *no_space_queue);
+    void tokens_in_queue(vector<Token> &tokens, queue *ifx);
     void infix_to_posfix(queue *ifx, queue *pfx);
     leaf *posfix_to_tree(queue *pfx);
-    double compile(leaf *l);
+    double evaluate(leaf *l);
+
+public:
+    double compile(vector<Token> &tokens);
 };
 
 #endif
