@@ -209,11 +209,7 @@ Expression::leaf *Expression::posfix_to_tree(queue *pfx)
     {
 
         Token &tok = cur->tok;
-        if (tok.type == NUMBER)
-            cout << "Lendo: [" << tok.val << "]" << endl;
-        else
-            cout << "Lendo: [" << tok.op << "]" << endl;
-
+   
         if (tok.type == NUMBER)
         {
             push_tree(&t, new_leaf(tok));
