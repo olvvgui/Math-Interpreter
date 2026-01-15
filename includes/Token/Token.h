@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "Utils.h"
+#include "Exceptions.h"
 
 using namespace std;
 
@@ -26,7 +27,6 @@ struct Token
 Token NumberToken(double val);
 Token OperatorToken(char op);
 vector<Token> tokenize(string &exp);
-bool verify_expression(vector<Token> &tokens);
 void print_tokens(vector<Token> &tokens);
 
 #endif

@@ -1,39 +1,40 @@
-# ==============================
-# CONFIGURAÇÕES FÁCEIS DE ALTERAR
-# ==============================
+# ===== Configurações =====
+CXX       := g++
+CXXFLAGS  := -std=c++17 -Wall -Wextra -O2
+INCLUDES  := -Iincludes/DataStructures -Iincludes/Exceptions -Iincludes/Interpreter -Iincludes/Token -Iincludes/Utils 
 
-TARGET   = Math_Interpreter
-CXX      = g++
-CXXFLAGS = -Wall -Wextra -std=c++17
-INCLUDES = -Iincludes
+TARGET    := Math_Interpreter
+BUILD_DIR := build
 
-# ==============================
-# ARQUIVOS DO PROJETO
-# ==============================
+# ===== Fontes =====
+SRC := \
+    src/Main.cpp \
+    includes/DataStructures/DataStructures.cpp \
+    includes/Exceptions/Exceptions.cpp \
+    includes/Interpreter/Interpreter.cpp \
+    includes/Token/Token.cpp \
+    includes/Utils/Utils.cpp
 
-SRC = Main.cpp \
-      includes/Expression.cpp \
-      includes/Token.cpp \
-      includes/Utils.cpp
+OBJ := $(SRC:%.cpp=$(BUILD_DIR)/%.o)
 
-OBJ = $(SRC:.cpp=.o)
+# ===== Regra padrão =====
+all: run
 
-# ==============================
-# REGRAS
-# ==============================
+# ===== Executar =====
+run: $(TARGET)
+	@./$(TARGET)
 
-all: $(TARGET)
-
+# ===== Link =====
 $(TARGET): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ) -o $(TARGET)
+	$(CXX) $(OBJ) -o $@
 
-%.o: %.cpp
+# ===== Compilar .cpp -> .o =====
+$(BUILD_DIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
+# ===== Limpar =====
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET)
 
-run: all
-	./$(TARGET)
-
-.PHONY: all clean run
+rebuild: clean all

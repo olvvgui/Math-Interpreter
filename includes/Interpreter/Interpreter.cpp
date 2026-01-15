@@ -1,128 +1,6 @@
-#include "Expression.h"
+#include "Interpreter.h"
 
-using namespace std;
-
-/* ===================== */
-/*         QUEUE        */
-/* ===================== */
-
-void Expression::inicialize_queue(queue *q)
-{
-    q->first = q->last = nullptr;
-}
-
-void Expression::enqueue(queue *q, Token t)
-{
-    node *temp = new node;
-    temp->tok = t;
-    temp->next = nullptr;
-    temp->prev = q->last;
-
-    if (q->first == nullptr)
-    {
-        q->first = temp;
-        q->last = temp;
-    }
-    else
-    {
-        q->last->next = temp;
-        q->last = temp;
-    }
-    return;
-}
-
-bool Expression::dequeue(queue *q, Token &out)
-{
-
-    if (q->first == nullptr)
-        return false;
-    node *aux = q->first;
-
-    q->first = q->first->next; // case q.1.nxt = null the expression is null
-    out = aux->tok;
-    delete aux;
-
-    if (q->first == nullptr)
-        q->last = nullptr;
-
-    return true;
-}
-
-/* ===================== */
-/*        STACKS         */
-/* ===================== */
-
-void Expression::inicialize_stack(stack *s)
-{
-    s->top = nullptr;
-    s->size = 0;
-}
-
-void Expression::push(char c, stack *s)
-{
-    node_stack *token = new node_stack;
-
-    token->val = c;
-    token->next = s->top;
-    s->top = token;
-    s->size++;
-    return;
-}
-
-char Expression::pop(stack *s)
-{
-    if (s->top == nullptr)
-        return ' ';
-
-    int v = s->top->val;
-    node_stack *aux = s->top;
-
-    s->top = s->top->next;
-    delete aux;
-    s->size--;
-    return v;
-}
-
-/* ===================== */
-/*      TREE & LEAF      */
-/* ===================== */
-void Expression::inicialize_tree(tree *t)
-{
-    t->top = -1;
-}
-
-void Expression::push_tree(tree *t, leaf *n)
-{
-    if (t->top >= 100 - 1)
-    {
-        return;
-    }
-
-    t->top++;
-    t->data[t->top] = n;
-    return;
-}
-
-Expression::leaf *Expression::pop_tree(tree *t)
-{
-    if (t->top < 0)
-        return nullptr;
-    return t->data[t->top--];
-}
-
-Expression::leaf *Expression::new_leaf(Token &t)
-{
-    leaf *l = new leaf;
-    l->tok = t;
-    l->left = l->right = nullptr;
-    return l;
-}
-
-/* ===================== */
-/*      INTERPRETER      */
-/* ===================== */
-
-void Expression::tokens_in_queue(vector<Token> &tokens, queue *ifx)
+void Interpreter::tokens_in_queue(vector<Token> &tokens, queue *ifx)
 {
     for (Token &t : tokens)
     {
@@ -130,21 +8,47 @@ void Expression::tokens_in_queue(vector<Token> &tokens, queue *ifx)
     }
 }
 
-void Expression::infix_to_posfix(queue *ifx, queue *pfx)
+void Interpreter::infix_to_posfix(queue *ifx, queue *pfx)
 {
     node *cur = ifx->first;
+
     stack *oprS = new stack;
     inicialize_stack(oprS);
+
+    bool expectingOperand = true;
+
     while (cur != nullptr)
     {
         Token &tok = cur->tok;
+
+        if (expectingOperand &&
+            tok.type != NUMBER &&
+            tok.type != UNARY_OPERATOR &&
+            tok.type != LPAREN)
+
+        {
+            print_error(SyntaxError);
+            return;
+        }
+        else if (!expectingOperand &&
+                 tok.type != BINARY_OPERATOR &&
+                 tok.type != RPAREN)
+        {
+            print_error(SyntaxError);
+            return;
+        }
+
         if (tok.type == NUMBER)
         {
             enqueue(pfx, tok);
+            expectingOperand = false;
         }
 
         else if (tok.type == LPAREN)
+        {
             push(tok.op, oprS);
+            expectingOperand = true;
+        }
 
         else if (tok.type == RPAREN)
         {
@@ -153,19 +57,20 @@ void Expression::infix_to_posfix(queue *ifx, queue *pfx)
                 enqueue(pfx, OperatorToken(pop(oprS)));
             }
             if (oprS->top == nullptr)
+            {
+                print_error(UnmatchedParenthesis);
                 return; // syntax error
+            }
 
             pop(oprS);
+            expectingOperand = false;
         }
 
         else
         {
-            bool isValidPosition = cur == ifx->first ||
-                                   (cur->prev && isOperator(cur->prev->tok.op)) ||
-                                   (cur->prev && cur->prev->tok.type == LPAREN);
 
             char op = tok.op;
-            if (isValidPosition && op == '-')
+            if (tok.type == UNARY_OPERATOR && tok.op == '-')
                 op = '~';
 
             bool right_assoc = (op == '^' || op == '~'); // association
@@ -185,6 +90,7 @@ void Expression::infix_to_posfix(queue *ifx, queue *pfx)
             }
 
             push(op, oprS);
+            expectingOperand = true;
         }
 
         cur = cur->next;
@@ -192,14 +98,17 @@ void Expression::infix_to_posfix(queue *ifx, queue *pfx)
     while (oprS->top != nullptr)
     {
         if (oprS->top->val == '(')
+        {
+            print_error(UnmatchedParenthesis);
             return;
+        }
         enqueue(pfx, OperatorToken(pop(oprS)));
     }
 
     delete oprS;
 }
 
-Expression::leaf *Expression::posfix_to_tree(queue *pfx)
+leaf *Interpreter::posfix_to_tree(queue *pfx)
 {
     tree t;
     inicialize_tree(&t);
@@ -209,7 +118,7 @@ Expression::leaf *Expression::posfix_to_tree(queue *pfx)
     {
 
         Token &tok = cur->tok;
-   
+
         if (tok.type == NUMBER)
         {
             push_tree(&t, new_leaf(tok));
@@ -246,7 +155,7 @@ Expression::leaf *Expression::posfix_to_tree(queue *pfx)
     return pop_tree(&t);
 }
 
-double Expression::evaluate(leaf *root)
+double Interpreter::evaluate(leaf *root)
 {
     Token &tok = root->tok;
     if (tok.type == NUMBER)
@@ -277,7 +186,7 @@ double Expression::evaluate(leaf *root)
     return 0;
 }
 
-double Expression::compile(vector<Token> &tokens)
+double Interpreter::run(string expression)
 {
     const string GREEN = "\033[32m";
     const string BOLD = "\033[1m";
@@ -286,9 +195,13 @@ double Expression::compile(vector<Token> &tokens)
     queue q;
     queue posfix;
     tree t;
+    vector<Token> tokens;
     inicialize_queue(&q);
     inicialize_queue(&posfix);
     inicialize_tree(&t);
+
+    tokens = tokenize(expression);
+    print_tokens(tokens);
 
     tokens_in_queue(tokens, &q);
 

@@ -20,7 +20,6 @@ char returnOperator(char op)
     }
     return ' ';
 }
-
 int get_precedence(char op)
 {
     if (op == '~')
@@ -36,12 +35,35 @@ int get_precedence(char op)
 
     return 0;
 }
+void hide_cursor()
+{
+    std::cout << "\033[?25l";
+    std::cout.flush();
+}
+
+void show_cursor()
+{
+    std::cout << "\033[?25h";
+    std::cout.flush();
+}
 void enter_to_continue()
 {
-
-    const string RED = "\033[31m";
-    const string RESET = "\033[0m";
+    hide_cursor();
     cout << RED << "\nPress enter to continue" << RESET << endl;
 
     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+    show_cursor();
+}
+
+void show_screen()
+{
+
+    cout << BOLD << "Example of a valid expression:"
+         << RESET << endl;
+
+    cout << GREEN << "(-4) + 3 * 5^4 * (3/4)\n"
+         << RESET << endl;
+
+    cout << RED << "Type your Expression:\n"
+         << RESET << endl;
 }
