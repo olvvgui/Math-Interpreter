@@ -9,7 +9,7 @@ bool isOperator(char op)
 
     return false;
 }
-char returnOperator(char op)
+char wreturnOperator(char op)
 {
     char operators[] = {'+', '-', '*', '/', '^'};
 

@@ -8,7 +8,7 @@ void Interpreter::tokens_in_queue(vector<Token> &tokens, queue *ifx)
     }
 }
 
-void Interpreter::infix_to_posfix(queue *ifx, queue *pfx)
+bool Interpreter::parse(queue *ifx, queue *pfx)
 {
     node *cur = ifx->first;
 
@@ -28,14 +28,14 @@ void Interpreter::infix_to_posfix(queue *ifx, queue *pfx)
 
         {
             print_error(SyntaxError);
-            return;
+            return false;
         }
         else if (!expectingOperand &&
                  tok.type != BINARY_OPERATOR &&
                  tok.type != RPAREN)
         {
             print_error(SyntaxError);
-            return;
+            return false;
         }
 
         if (tok.type == NUMBER)
@@ -59,7 +59,7 @@ void Interpreter::infix_to_posfix(queue *ifx, queue *pfx)
             if (oprS->top == nullptr)
             {
                 print_error(UnmatchedParenthesis);
-                return; // syntax error
+                return false;
             }
 
             pop(oprS);
@@ -100,12 +100,13 @@ void Interpreter::infix_to_posfix(queue *ifx, queue *pfx)
         if (oprS->top->val == '(')
         {
             print_error(UnmatchedParenthesis);
-            return;
+            return false;
         }
         enqueue(pfx, OperatorToken(pop(oprS)));
     }
 
     delete oprS;
+    return true;
 }
 
 leaf *Interpreter::posfix_to_tree(queue *pfx)
@@ -126,7 +127,7 @@ leaf *Interpreter::posfix_to_tree(queue *pfx)
             continue;
         }
 
-        else if (tok.val == '~')
+        else if (tok.op == '~')
         {
 
             leaf *right = pop_tree(&t);
@@ -161,7 +162,7 @@ double Interpreter::evaluate(leaf *root)
     if (tok.type == NUMBER)
         return tok.val;
 
-    if (tok.val == '~')
+    if (tok.op == '~')
     {
         double right = evaluate(root->right);
         return -right;
@@ -186,7 +187,7 @@ double Interpreter::evaluate(leaf *root)
     return 0;
 }
 
-double Interpreter::run(string expression)
+void Interpreter::run(string expression)
 {
     const string GREEN = "\033[32m";
     const string BOLD = "\033[1m";
@@ -201,17 +202,22 @@ double Interpreter::run(string expression)
     inicialize_tree(&t);
 
     tokens = tokenize(expression);
-    print_tokens(tokens);
+    // print_tokens(tokens);
 
     tokens_in_queue(tokens, &q);
 
-    infix_to_posfix(&q, &posfix);
+    bool isValid = parse(&q, &posfix);
+
+    if (!isValid)
+        return;
 
     leaf *l = posfix_to_tree(&posfix);
 
+    double result = evaluate(l);
+
     cout << BOLD << "\nResult: " << RESET;
 
-    cout << GREEN << evaluate(l) << RESET << endl;
+    cout << GREEN << result << RESET << endl;
 
-    return evaluate(l);
+    return;
 }

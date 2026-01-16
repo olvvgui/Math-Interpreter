@@ -14,12 +14,12 @@ class Interpreter
 {
 private:
     void tokens_in_queue(vector<Token> &tokens, queue *ifx);
-    void infix_to_posfix(queue *ifx, queue *pfx);
+    bool parse(queue *ifx, queue *pfx);
     leaf *posfix_to_tree(queue *pfx);
     double evaluate(leaf *l);
 
 public:
-    double run(string expression);
+    void run(string expression);
 };
 
 #endif

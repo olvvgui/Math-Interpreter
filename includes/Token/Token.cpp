@@ -79,14 +79,14 @@ vector<Token> tokenize(string &expr)
         }
         if (expr[i] == '(')
         {
-            tokens.push_back({LPAREN, 0, 0});
+            tokens.push_back({LPAREN, 0, '('});
             i++;
             expectingUnary = true;
             continue;
         }
         if (expr[i] == ')')
         {
-            tokens.push_back({RPAREN, 0, 0});
+            tokens.push_back({RPAREN, 0, ')'});
             i++;
             expectingUnary = false;
             continue;
@@ -98,7 +98,7 @@ vector<Token> tokenize(string &expr)
 
 void print_tokens(vector<Token> &tokens)
 {
-
+    cout << endl;
     for (Token &t : tokens)
     {
         if (t.type == NUMBER)
