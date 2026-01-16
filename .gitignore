@@ -1,0 +1,20 @@
+# ===== C++  build =====
+build
+.o
+.out
+.exe
+.obj
+.log
+
+# ===== IDEs =====
+# CLion  JetBrains
+.idea
+.iml
+.idea
+
+# VS Code
+.vscode
+
+# ===== Sistema =====
+.DS_Store
+Thumbs.db
