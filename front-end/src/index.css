@@ -1,0 +1,81 @@
+body {
+  background-image: url(assets/background.jpg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  margin: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5vh 5vw;
+  box-sizing: border-box;
+
+  font-family: "D", serif;
+}
+
+.calculator-container {
+  background-image: url(assets/calculator_background.png);
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  width: 90vw;
+  max-width: 1266px;
+
+  aspect-ratio: 1266 / 933;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.text-container {
+  background-image: url(assets/text_background.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  position: absolute;
+  top: 6%;
+  left: 5%;
+  width: 90%;
+
+  aspect-ratio: 1102 / 177;
+}
+
+.keypad-container {
+  background-image: url(assets/buttons_background.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  position: absolute;
+  top: 28%;
+  left: 5%;
+  width: 90%;
+
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 20px;
+  padding: 55px 40px;
+  box-sizing: border-box;
+
+  aspect-ratio: 1102 / 542;
+}
+
+.keypad-container button {
+  background-image: url(assets/button.png);
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  aspect-ratio: 141 / 141;
+
+  border: none;
+  font-family: inherit;
+  font-size: 5rem;
+  color: rgb(138, 148, 226);
+}
