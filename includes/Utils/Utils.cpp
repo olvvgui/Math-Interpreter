@@ -22,9 +22,9 @@ char wreturnOperator(char op)
 }
 int get_precedence(char op)
 {
-    if (op == '~')
-        return 4; // unary operator
     if (op == '^')
+        return 4; // unary operator
+    if (op == '~')
         return 3;
 
     if (op == '*' || op == '/')
